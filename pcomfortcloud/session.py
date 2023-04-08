@@ -51,6 +51,7 @@ class Session(object):
         password (str): Password used to login to verisure app
 
     """
+    requestsSession: requests.Session = None
 
     def __init__(self, username, password, tokenFileName='~/.panasonic-token', raw=False, verifySsl=True):
         self._username = username
@@ -75,6 +76,12 @@ class Session(object):
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.logout()
+        
+    def __getRequestsSession(self) -> requests.Session:
+        if self.requestsSession is None:
+            self.requestsSession = requests.Session()
+            self.requestsSession.keep_alive = True
+        return self.requestsSession
 
     def login(self):
         """ Login to verisure app api """
@@ -127,7 +134,7 @@ class Session(object):
         if self._raw: print("--- creating token by authenticating")
 
         try:
-            response = requests.post(urls.login(), json=payload, headers=self._headers(), verify=self._verifySsl)
+            response = self.__getRequestsSession().post(urls.login(), json=payload, headers=self._headers(), verify=self._verifySsl)
             if 2 != response.status_code // 100:
                 raise ResponseError(response.status_code, response.text)
 
@@ -148,7 +155,7 @@ class Session(object):
         response = None
 
         try:
-            response = requests.get(urls.get_groups(),headers=self._headers(), verify=self._verifySsl)
+            response = self.__getRequestsSession().get(urls.get_groups(),headers=self._headers(), verify=self._verifySsl)
 
             if 2 != response.status_code // 100:
                 raise ResponseError(response.status_code, response.text)
@@ -205,7 +212,7 @@ class Session(object):
             response = None
 
             try:
-                response = requests.get(urls.status(deviceGuid), headers=self._headers(), verify=self._verifySsl)
+                response = self.__getRequestsSession().get(urls.status(deviceGuid), headers=self._headers(), verify=self._verifySsl)
 
                 if 2 != response.status_code // 100:
                     raise ResponseError(response.status_code, response.text)
@@ -237,7 +244,7 @@ class Session(object):
             }
 
             try:
-                response = requests.post(urls.history(), json=payload, headers=self._headers(), verify=self._verifySsl)
+                response = self.__getRequestsSession().post(urls.history(), json=payload, headers=self._headers(), verify=self._verifySsl)
 
                 if 2 != response.status_code // 100:
                     raise ResponseError(response.status_code, response.text)
@@ -268,7 +275,7 @@ class Session(object):
             response = None
 
             try:
-                response = requests.get(urls.status(deviceGuid), headers=self._headers(), verify=self._verifySsl)
+                response = self.__getRequestsSession().get(urls.status(deviceGuid), headers=self._headers(), verify=self._verifySsl)
 
                 if 2 != response.status_code // 100:
                     raise ResponseError(response.status_code, response.text)
@@ -383,7 +390,7 @@ class Session(object):
                 print("--- raw out ending    ---")
 
             try:
-                response = requests.post(urls.control(), json=payload, headers=self._headers(), verify=self._verifySsl)
+                response = self.__getRequestsSession().post(urls.control(), json=payload, headers=self._headers(), verify=self._verifySsl)
 
                 if 2 != response.status_code // 100:
                     raise ResponseError(response.status_code, response.text)
