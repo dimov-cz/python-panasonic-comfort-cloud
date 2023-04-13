@@ -11,6 +11,12 @@ import hashlib
 from . import urls
 from . import constants
 
+#import urllib3.util.connection as urllib3_conn
+#urllib3_conn.DEFAULT_MAX_POOL_SIZE = 30
+#urllib3.poolmanager.PoolManager.DEFAULT_POOL_SIZE = 30
+requestsPool = urllib3.PoolManager(num_pools=10, maxsize=30)
+
+
 def _validate_response(response):
     """ Verify that response is OK """
     if response.status_code == 200:
@@ -80,6 +86,8 @@ class Session(object):
     def __getRequestsSession(self) -> requests.Session:
         if self.requestsSession is None:
             self.requestsSession = requests.Session()
+            adapter = requests.adapters.HTTPAdapter(pool_connections=30, pool_maxsize=30)
+            self.requestsSession.mount('https://', adapter)
             self.requestsSession.keep_alive = True
         return self.requestsSession
 
