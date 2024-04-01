@@ -62,7 +62,6 @@ class Session(object):
         self._devices = None
         self._deviceIndexer = {}
         self._raw = raw
-        self._appVersionUpdater = AppVersion()
 
         if verifySsl == False:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
