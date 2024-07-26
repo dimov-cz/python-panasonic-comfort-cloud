@@ -10,6 +10,7 @@ import hashlib
 
 from . import urls
 from . import constants
+from .app_version import AppVersion
 
 def _validate_response(response):
     """ Verify that response is OK """
@@ -61,6 +62,7 @@ class Session(object):
         self._devices = None
         self._deviceIndexer = {}
         self._raw = raw
+        self._appVersionUpdater = AppVersion()
 
         if verifySsl == False:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -106,9 +108,10 @@ class Session(object):
         """ Logout """
 
     def _headers(self):
+        version = self._appVersionUpdater.get_version()
         return {
             "X-APP-TYPE": "1",
-            "X-APP-VERSION": "1.20.1",
+            "X-APP-VERSION": version,
             "X-User-Authorization": self._vid,
             "X-APP-TIMESTAMP": "1",
             "X-APP-NAME": "Comfort Cloud",
