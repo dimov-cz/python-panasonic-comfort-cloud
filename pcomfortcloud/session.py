@@ -23,6 +23,7 @@ def generate_random_string_hex(length):
 def check_response(response, function_description, expected_status):
     if response.status_code != expected_status:
         raise exceptions.ResponseError(
+            response.status_code,
             f"({function_description}: Expected status code {expected_status}, received: {response.status_code}: " +
             f"{response.text}"
         )
